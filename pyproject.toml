@@ -5,7 +5,9 @@ description = "Voice to Action demo using Microsoft Foundry Local and Microsoft 
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "openai",
-    "foundry-local-sdk",
     "agent-framework",
+    "gtts",
+    "foundry-local-sdk",
+    "openai-whisper",
+    "openai",
 ]
