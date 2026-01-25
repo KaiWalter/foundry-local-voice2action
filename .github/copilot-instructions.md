@@ -1,25 +1,33 @@
 # Copilot Instructions
 
 ## Context
-- This repo is a minimal Voice-to-Action demo that runs entirely on-device using Microsoft Foundry Local and the OpenAI Python SDK.
-- The only runtime entry point today is `app.py`, which demonstrates sending a single chat completion to the locally hosted Phi-4-Mini model alias.
+- Minimal Voice-to-Action prototype that runs entirely on-device via Foundry Local, exposing a Phi-4-Mini alias and interacting through the OpenAI Python SDK.
+- The demo is a single CLI script ([app.py](../app.py)) that exercises OpenAI-style tool calling against the local model endpoint.
+- Project is uv-managed; Python requirement is ≥3.14 per [pyproject.toml](../pyproject.toml).
 
-## Key Files
-- `app.py`: boots `FoundryLocalManager`, exposes the Foundry Local endpoint and API key, then calls `openai.OpenAI` with `chat.completions.create`.
-- `pyproject.toml`: managed by uv; declares the `openai` and `foundry-local` dependencies plus Python 3.10+ requirement.
-- `README.md`: documents that all runs/tests must go through `uv run ...` so agents inherit the uv-managed environment.
+## Key Files & Entry Points
+- [app.py](../app.py): defines the `ToolCall` class, boots `FoundryLocalManager`, configures `openai.OpenAI`, and drives a multi-turn chat completion loop with tool invocation.
+- [pyproject.toml](../pyproject.toml): lists runtime deps (`openai`, `foundry-local-sdk`); any new scripts must stay compatible with uv’s lock/resolution.
+- [README.md](../README.md): states the uv-first workflow—every run/test should use `uv run …` so the Foundry Local manager hooks fire correctly.
 
-## Implementation Patterns
-- Always obtain the base URL and API key from a `FoundryLocalManager` instance instead of hard-coding endpoints; the manager auto-starts the local service and downloads/loads the correct model.
-- Fetch the concrete model ID via `manager.get_model_info(alias).id` before passing it to the OpenAI client; aliases resolve to versioned IDs that may change.
-- Use OpenAI-compatible request objects (`messages`, `model`, etc.); Foundry Local mirrors the OpenAI REST contract, so standard SDK patterns apply.
+## Core Flow (app.py)
+- Always resolve the model dynamically: `manager = FoundryLocalManager(alias)` followed by `manager.get_model_info(alias).id`; never hard-code IDs because aliases map to versioned builds.
+- The OpenAI client must point to the local service: `OpenAI(base_url=manager.endpoint, api_key=manager.api_key)` even when the key is blank.
+- Tool calling loop: first request forces `tool_choice="required"`, later turns fall back to `"auto"`; helper functions (`get_current_weather`, etc.) append tool responses with a `tool_call_id` so the model can continue the conversation.
+- Messages are accumulated in `input_list` exactly as the OpenAI REST contract expects (assistant/tool pairs). Preserve this structure when extending scenarios (e.g., adding new tools or user prompts).
 
-## Workflows
-- Installation/lock: `uv sync` (installs deps from `pyproject.toml`).
-- Run the sample: `uv run app.py` (ensures Foundry Local service starts automatically via the manager).
-- Extend into tests or scripts with `uv run <module>` to stay inside the same environment.
+## Local Workflows
+- Install/refresh deps: `uv sync` (runs lock + install respecting [pyproject.toml](../pyproject.toml)).
+- Run the demo: `uv run app.py`; this auto-starts Foundry Local, downloads models on first use, and prints both intermediate tool-call payloads and the final assistant reply.
+- New command-line scripts should also be invoked via `uv run <script.py>` so they inherit the same virtual env and Foundry Local availability.
 
-## Gotchas
-- The API key returned by `FoundryLocalManager` can be blank for local usage, but still pass `manager.api_key` to satisfy the OpenAI client constructor.
-- Large model downloads happen on first run; handle this latency by surfacing progress or caching models before tight loops.
-- If you change the alias (e.g., `alias = "phi-4"`), ensure the target model is available locally or expect the manager to download it on demand.
+## Conventions & Gotchas
+- Reuse the module-level helpers in [app.py](../app.py) when adding tools so every tool result is JSON-serialized and tagged with the originating `tool_call_id`.
+- The mock tool implementations currently return canned strings—if you swap in real APIs, keep latency in mind because Foundry Local may still be downloading models on first run.
+- Local API key can be empty, but the OpenAI client still requires the parameter; do not omit it.
+- If you change the alias (`alias = "phi-4-mini"` today), expect Foundry Local to download the new weights; surface that latency to users as needed.
+- Because Python ≥3.14 is enforced, avoid syntax/features that rely on older versions; let uv manage interpreter selection.
+
+## Extending
+- To add more user interactions, push additional `{ "role": "user", ... }` entries into `input_list` rather than restarting the manager—this ensures multi-turn parity with OpenAI’s tools contract.
+- When adding new dependencies, edit [pyproject.toml](../pyproject.toml) then rerun `uv sync`; avoid `pip install` directly to keep the lock consistent.
