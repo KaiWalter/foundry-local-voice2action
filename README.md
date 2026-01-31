@@ -30,6 +30,13 @@ Runtime folders (`.voice-inbox/`, `.voice-processed/`, `.work/`) are created aut
 uv run app.py
 ```
 
+### Observe
+
+- Drop MP3 files into the inbox folder.
+- Watch console output for transcript results and warnings.
+- Check `.work/voice-inbox.log` for logs.
+- Confirm processed files move to `.voice-processed/`.
+
 ## Troubleshooting
 
 On corporate machine Foundry Local service is started but cannot be access by the apps. Issue might be that some of the randomly selected ports are blocked by the firewall. To fix this set a port that is not blocked:
