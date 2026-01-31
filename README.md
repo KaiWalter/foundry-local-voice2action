@@ -16,7 +16,7 @@ After installation, re-run `uv run sample-transcribe.py` to verify that Whisper 
 
 On corporate machine Foundry Local service is started but cannot be access by the apps. Issue might be that some of the randomly selected ports are blocked by the firewall. To fix this set a port that is not blocked:
 
-```
+```shell
 foundry service set --port 5000
 ```
 
