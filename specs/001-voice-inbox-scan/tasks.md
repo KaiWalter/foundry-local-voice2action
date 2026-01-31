@@ -98,7 +98,7 @@ description: "Task list for Voice Inbox Transcription"
 **Purpose**: Documentation and manual verification of invocation-only flows
 
 - [x] T018 [P] Update README.md with environment variables, defaults, and runtime folder behavior
-- [ ] T019 Manual verification: run `uv run app.py`, drop an MP3 into the inbox, observe console output + .work log, confirm move to processed (record observations in specs/001-voice-inbox-scan/quickstart.md)
+- [x] T019 Manual verification: run `uv run app.py`, drop an MP3 into the inbox, observe console output + .work log, confirm move to processed (record observations in specs/001-voice-inbox-scan/quickstart.md)
 
 ---
 
