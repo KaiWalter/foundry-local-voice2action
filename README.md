@@ -19,3 +19,11 @@ On corporate machine Foundry Local service is started but cannot be access by th
 ```
 foundry service set --port 5000
 ```
+
+## Development Constitution
+
+Follow .specify/memory/constitution.md for the project’s guiding principles:
+
+- Application logic must always be accompanied by automated tests (refer to the Testable Application Logic principle).
+- Any flow that invokes Foundry Local, CLI tooling, or other runtimes is currently treated as manual verification and must describe the observed behavior; mark these steps as non-testable following the Invocation Stewardship principle.
+- Run all Python scripts and tests via `uv run …`, and use sample-agent-framework.py plus sample-transcribe.py as reference implementations before writing new tooling.
