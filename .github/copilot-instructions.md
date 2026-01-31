@@ -6,9 +6,10 @@
 - Project is uv-managed; Python requirement is ≥3.14 per [pyproject.toml](../pyproject.toml).
 
 ## Key Files & Entry Points
-- [app.py](../app.py): defines the `ToolCall` class, boots `FoundryLocalManager`, configures `openai.OpenAI`, and drives a multi-turn chat completion loop with tool invocation.
+- [app-framework.py](../app-framework.py): wires up `FoundryLocalManager` with `agent_framework` to demonstrate calling `get_weather`/`get_forecast` helpers via a local model run.
 - [pyproject.toml](../pyproject.toml): lists runtime deps (`openai`, `foundry-local-sdk`); any new scripts must stay compatible with uv’s lock/resolution.
 - [README.md](../README.md): states the uv-first workflow—every run/test should use `uv run …` so the Foundry Local manager hooks fire correctly.
+- [sample-agent-framework.py](../sample-agent-framework.py) and [sample-transcribe.py](../sample-transcribe.py): reference implementations for agent-driven tool calling and Whisper transcription that should guide new tooling or scripts.
 
 ## Core Flow (app.py)
 - Always resolve the model dynamically: `manager = FoundryLocalManager(alias)` followed by `manager.get_model_info(alias).id`; never hard-code IDs because aliases map to versioned builds.

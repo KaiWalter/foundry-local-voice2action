@@ -1,6 +1,6 @@
 # foundry-local-voice2action
 
-Implement Voice 2 Action flow with Microsoft Foundry Local and Microsoft Agent Framework
+Implement Voice 2 Action flow with [Foundry Local](https://www.foundrylocal.ai/) and Microsoft [Agent Framework](https://learn.microsoft.com/en-us/agent-framework/)
 
 ## Audio Transcription Dependencies
 
