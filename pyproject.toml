@@ -10,4 +10,5 @@ dependencies = [
     "foundry-local-sdk",
     "openai-whisper",
     "openai",
+    "pytest",
 ]

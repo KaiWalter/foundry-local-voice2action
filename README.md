@@ -12,11 +12,29 @@ The Whisper-based transcription sample (`sample-transcribe.py`) relies on the FF
 
 After installation, re-run `uv run sample-transcribe.py` to verify that Whisper can find the FFmpeg executable.
 
+## Voice Inbox Scanner (app.py)
+
+The voice inbox scanner watches a local folder for MP3 files, transcribes them to English text, prints the transcript to the console, and moves processed files to a processed folder. It also logs to `.work/voice-inbox.log`.
+
+### Configuration
+
+- `V2A_VOICE_INBOX` (default: `.voice-inbox`)
+- `V2A_VOICE_PROCESSED` (default: `.voice-processed`)
+- `V2A_SCAN_INTERVAL` (default: `30` seconds)
+
+Runtime folders (`.voice-inbox/`, `.voice-processed/`, `.work/`) are created automatically and ignored by Git.
+
+### Run
+
+```shell
+uv run app.py
+```
+
 ## Troubleshooting
 
 On corporate machine Foundry Local service is started but cannot be access by the apps. Issue might be that some of the randomly selected ports are blocked by the firewall. To fix this set a port that is not blocked:
 
-```
+```shell
 foundry service set --port 5000
 ```
 
