@@ -6,7 +6,6 @@
 - Project is uv-managed; Python requirement is ≥3.14 per [pyproject.toml](../pyproject.toml).
 
 ## Key Files & Entry Points
-- [app-framework.py](../app-framework.py): wires up `FoundryLocalManager` with `agent_framework` to demonstrate calling `get_weather`/`get_forecast` helpers via a local model run.
 - [pyproject.toml](../pyproject.toml): lists runtime deps (`openai`, `foundry-local-sdk`); any new scripts must stay compatible with uv’s lock/resolution.
 - [README.md](../README.md): states the uv-first workflow—every run/test should use `uv run …` so the Foundry Local manager hooks fire correctly.
 - [sample-agent-framework.py](../sample-agent-framework.py) and [sample-transcribe.py](../sample-transcribe.py): reference implementations for agent-driven tool calling and Whisper transcription that should guide new tooling or scripts.
