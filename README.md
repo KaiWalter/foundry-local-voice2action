@@ -11,3 +11,11 @@ The Whisper-based transcription sample (`sample-transcribe.py`) relies on the FF
 - **Linux (apt):** `sudo apt-get install ffmpeg`
 
 After installation, re-run `uv run sample-transcribe.py` to verify that Whisper can find the FFmpeg executable.
+
+## Troubleshooting
+
+On corporate machine Foundry Local service is started but cannot be access by the apps. Issue might be that some of the randomly selected ports are blocked by the firewall. To fix this set a port that is not blocked:
+
+```
+foundry service set --port 5000
+```

@@ -12,11 +12,15 @@
       mkShellFor = system:
         let
           pkgs = import nixpkgs { inherit system; };
+          lib = pkgs.lib;
         in pkgs.mkShell {
           buildInputs = [
             pkgs.alejandra
             pkgs.python314.pkgs.uv
           ];
+          shellHook = ''
+            exec ${lib.getExe pkgs.zsh} -l
+          '';
         };
       mkPackageFor = system:
         let
