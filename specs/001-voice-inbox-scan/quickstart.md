@@ -24,3 +24,4 @@
 ## Manual Verification Notes
 
 - Whisper model download/usage and FFmpeg availability are manual verification items per the constitution.
+- Manual verification (T019, 2026-01-31): Ran `uv run app.py`, placed an MP3 in `.voice-inbox`, observed transcript logged to console and `.work/voice-inbox.log`, and confirmed file moved to `.voice-processed`.

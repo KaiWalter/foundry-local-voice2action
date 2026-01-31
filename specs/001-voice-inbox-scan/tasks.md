@@ -18,7 +18,6 @@ description: "Task list for Voice Inbox Transcription"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Update pyproject.toml and uv.lock to add pytest dependency for automated tests
 - [x] T001 Update pyproject.toml and uv.lock to add pytest dependency for automated tests
 - [x] T002 [P] Add shared test fixtures for temp inbox/work/processed dirs in tests/conftest.py
 
