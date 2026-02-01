@@ -6,7 +6,9 @@
         "ForEach-Object": true,
         "git rev-parse": true,
         "git fetch": true,
-        "git ls-remote": true
+        "git ls-remote": true,
+        "git add": true,
+        "git commit": true
     },
     "chat.promptFilesRecommendations": {
         "speckit.constitution": true,
