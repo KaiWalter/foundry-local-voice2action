@@ -374,6 +374,7 @@ dependencies = [
     { name = "openai" },
     { name = "openai-whisper" },
     { name = "pytest" },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
@@ -384,6 +385,7 @@ requires-dist = [
     { name = "openai" },
     { name = "openai-whisper" },
     { name = "pytest" },
+    { name = "python-dotenv" },
 ]
 
 [[package]]

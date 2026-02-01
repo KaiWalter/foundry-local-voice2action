@@ -6,6 +6,7 @@ from pathlib import Path
 
 import app
 from app import INTENT_FILE_SUFFIX, process_inbox_once
+from tests.helpers.webhook_server import start_webhook_server
 
 
 def _intent_timestamp_from_work_dir(work_dir: Path) -> str:
@@ -145,3 +146,38 @@ def test_multi_file_processing_uses_matching_timestamps(
     assert not second_mp3.exists()
     assert expected_first.exists()
     assert expected_second.exists()
+
+
+def test_webhook_failure_still_moves_file(
+    temp_config, test_logger, monkeypatch, caplog
+) -> None:
+    temp_config.inbox_dir.mkdir(parents=True, exist_ok=True)
+    temp_config.processed_dir.mkdir(parents=True, exist_ok=True)
+
+    mp3_file = temp_config.inbox_dir / "voice.mp3"
+    mp3_file.write_text("data", encoding="utf-8")
+
+    def dummy_transcriber(_: Path) -> str:
+        return "hello"
+
+    def dummy_intent(_: str) -> dict[str, str]:
+        return {
+            "intent": "create-task",
+            "content": "upload the Performance Review Files",
+            "reminder": "2026-02-02T06:00:00+00:00",
+        }
+
+    server = start_webhook_server(response_status=500)
+    caplog.set_level(logging.ERROR)
+    monkeypatch.setenv("V2A_CREATE_TODO_WEBHOOK_URL", server.url)
+    try:
+        process_inbox_once(temp_config, test_logger, dummy_transcriber, set(), dummy_intent)
+    finally:
+        server.close()
+
+    timestamp = _intent_timestamp_from_work_dir(temp_config.work_dir)
+    expected_path = temp_config.processed_dir / f"{timestamp}-voice.mp3"
+
+    assert not mp3_file.exists()
+    assert expected_path.exists()
+    assert any("Webhook call failed" in record.message for record in caplog.records)

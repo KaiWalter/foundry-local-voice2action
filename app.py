@@ -5,18 +5,22 @@ import logging
 import os
 import shutil
 import time
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Callable, NotRequired, TypedDict
 
 import whisper
+from dotenv import load_dotenv
 from foundry_local import FoundryLocalManager
 from openai import OpenAI
 
 VOICE_INBOX_ENV = "V2A_VOICE_INBOX"
 VOICE_PROCESSED_ENV = "V2A_VOICE_PROCESSED"
 SCAN_INTERVAL_ENV = "V2A_SCAN_INTERVAL"
+CREATE_TODO_WEBHOOK_ENV = "V2A_CREATE_TODO_WEBHOOK_URL"
 
 DEFAULT_INBOX = ".voice-inbox"
 DEFAULT_PROCESSED = ".voice-processed"
@@ -26,6 +30,7 @@ DEFAULT_MODEL = "base"
 DEFAULT_INTENT_ALIAS = "qwen2.5-7b"
 INTENT_ALIAS_ENV = "V2A_INTENT_MODEL_ALIAS"
 INTENT_FILE_SUFFIX = "-intent.json"
+WEBHOOK_TIMEOUT_SECONDS = 10
 
 LOG_FILE_NAME = "voice-inbox.log"
 
@@ -140,6 +145,64 @@ def build_processed_destination(
 ) -> Path:
     timestamp = _intent_timestamp(intent_path)
     return processed_dir / f"{timestamp}-{original_name}"
+
+
+def get_create_todo_webhook_url(environ: dict[str, str] | None = None) -> str | None:
+    environ = environ or os.environ
+    raw_value = environ.get(CREATE_TODO_WEBHOOK_ENV)
+    if raw_value is None:
+        return None
+    value = raw_value.strip()
+    if value == "":
+        return None
+    if not (value.startswith("http://") or value.startswith("https://")):
+        raise ValueError(f"{CREATE_TODO_WEBHOOK_ENV} must start with http:// or https://")
+    return value
+
+
+def build_create_todo_payload(intent_payload: IntentPayload) -> dict[str, str]:
+    payload: dict[str, str] = {"title": intent_payload["content"]}
+    if "due" in intent_payload:
+        payload["due"] = intent_payload["due"]
+    if "reminder" in intent_payload:
+        payload["reminder"] = intent_payload["reminder"]
+    return payload
+
+
+def send_create_todo_webhook(
+    webhook_url: str,
+    payload: dict[str, str],
+    logger: logging.Logger,
+    timeout_seconds: int = WEBHOOK_TIMEOUT_SECONDS,
+) -> bool:
+    body = json.dumps(payload).encode("utf-8")
+    request_payload = body.decode("utf-8")
+    request = urllib.request.Request(
+        webhook_url,
+        data=body,
+        method="POST",
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+            status = response.status
+    except urllib.error.HTTPError as exc:
+        if exc.code == 400:
+            response_payload = exc.read().decode("utf-8", errors="replace")
+            logger.error("Webhook request payload: %s", request_payload)
+            logger.error("Webhook response payload: %s", response_payload)
+        logger.error("Webhook call failed with HTTP %s", exc.code)
+        return False
+    except urllib.error.URLError as exc:
+        logger.error("Webhook call failed: %s", exc)
+        return False
+
+    if 200 <= status < 300:
+        logger.info("Webhook delivered with status %s", status)
+        return True
+
+    logger.error("Webhook call failed with HTTP %s", status)
+    return False
 
 
 def _intent_tool_schema() -> dict:
@@ -434,6 +497,17 @@ def process_inbox_once(
             logger.error("Failed to write intent output for %s: %s", audio_path.name, exc)
             continue
         logger.info("Intent output written to %s", intent_path)
+        if intent_payload.get("intent") == "create-task":
+            try:
+                webhook_url = get_create_todo_webhook_url()
+            except ValueError as exc:
+                logger.error("%s", exc)
+            else:
+                if webhook_url is None:
+                    logger.error("%s is not set.", CREATE_TODO_WEBHOOK_ENV)
+                else:
+                    payload = build_create_todo_payload(intent_payload)
+                    send_create_todo_webhook(webhook_url, payload, logger)
         destination = build_processed_destination(
             intent_path,
             audio_path.name,
@@ -450,6 +524,7 @@ def process_inbox_once(
 
 
 def main() -> None:
+    load_dotenv()
     config = load_config()
     ensure_directories(config)
     logger = setup_logging(config.work_dir)
@@ -457,9 +532,12 @@ def main() -> None:
     transcriber = WhisperTranscriber()
     warned_non_mp3: set[Path] = set()
 
-    while True:
-        process_inbox_once(config, logger, transcriber.transcribe, warned_non_mp3)
-        time.sleep(config.scan_interval_seconds)
+    try:
+        while True:
+            process_inbox_once(config, logger, transcriber.transcribe, warned_non_mp3)
+            time.sleep(config.scan_interval_seconds)
+    except KeyboardInterrupt:
+        logger.info("Shutdown requested. Exiting.")
 
 
 if __name__ == "__main__":

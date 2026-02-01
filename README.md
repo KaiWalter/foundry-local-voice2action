@@ -21,6 +21,7 @@ The voice inbox scanner watches a local folder for MP3 files, transcribes them t
 - `V2A_VOICE_INBOX` (default: `.voice-inbox`)
 - `V2A_VOICE_PROCESSED` (default: `.voice-processed`)
 - `V2A_SCAN_INTERVAL` (default: `30` seconds)
+- `V2A_CREATE_TODO_WEBHOOK_URL` (optional): when set, create-task intents POST JSON to this webhook.
 
 Runtime folders (`.voice-inbox/`, `.voice-processed/`, `.work/`) are created automatically and ignored by Git.
 
@@ -61,6 +62,15 @@ The agent does not have direct access to my corporate to do list. It has to pass
   ]
 }
 ```
+
+### Webhook Delivery Semantics
+
+- Method: POST
+- Content-Type: `application/json`
+- Payload: `title` (required) + optional `due` and `reminder`
+- Success: any HTTP 2xx response
+- Failure: non-2xx responses are logged; 400 responses log request + response payloads
+- No authorization header is sent
 
 ## Troubleshooting
 
