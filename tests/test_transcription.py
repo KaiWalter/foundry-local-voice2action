@@ -35,7 +35,13 @@ def test_no_transcript_files_written(temp_config) -> None:
     def dummy_transcriber(_: Path) -> str:
         return "hello"
 
-    process_inbox_once(temp_config, logger, dummy_transcriber, set())
+    def dummy_intent(_: str) -> dict[str, str]:
+        return {"intent": "create-note", "content": "hello"}
+
+    process_inbox_once(temp_config, logger, dummy_transcriber, set(), dummy_intent)
 
     work_files = list(temp_config.work_dir.iterdir())
-    assert work_files == [temp_config.work_dir / LOG_FILE_NAME]
+    log_path = temp_config.work_dir / LOG_FILE_NAME
+    assert log_path in work_files
+    intent_files = [path for path in work_files if path.name.endswith("-intent.json")]
+    assert len(intent_files) == 1

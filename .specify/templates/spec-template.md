@@ -7,7 +7,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-> NOTE: Per the constitution’s Testable Application Logic principle, each story must call out how its logic is covered by automated tests. When a story describes an invocation-only flow, mark it as manual verification with an explicit explanation of why automation is not feasible.
+> NOTE: Per the constitution’s Testable Application Logic principle, each story must call out how its logic is covered by automated tests. When a story describes an invocation-only flow, mark it as manual verification with an explicit explanation of why automation is not feasible, except intent derivation which MUST be tested against the actual LLM model.
 
 <!--
   IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
@@ -79,7 +79,7 @@
 
 ## Requirements *(mandatory)*
 
-> NOTE: State for every requirement whether it is satisfied by automated tests or serves a manual invocation step, referencing the constitution’s Invocation Stewardship note when tests cannot cover the behavior.
+> NOTE: State for every requirement whether it is satisfied by automated tests or serves a manual invocation step, referencing the constitution’s Invocation Stewardship note when tests cannot cover the behavior. Intent derivation requires automated tests that use the actual LLM model.
 
 <!--
   ACTION REQUIRED: The content in this section represents placeholders.

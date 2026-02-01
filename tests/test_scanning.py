@@ -23,12 +23,15 @@ def test_non_mp3_warning_once(temp_config, test_logger, caplog) -> None:
     def dummy_transcriber(_: Path) -> str:
         return "hello"
 
+    def dummy_intent(_: str) -> dict[str, str]:
+        return {"intent": "create-note", "content": "hello"}
+
     caplog.set_level("WARNING")
-    process_inbox_once(temp_config, test_logger, dummy_transcriber, warned)
+    process_inbox_once(temp_config, test_logger, dummy_transcriber, warned, dummy_intent)
     warnings_first = [rec for rec in caplog.records if rec.levelname == "WARNING"]
     assert len(warnings_first) == 1
 
     caplog.clear()
-    process_inbox_once(temp_config, test_logger, dummy_transcriber, warned)
+    process_inbox_once(temp_config, test_logger, dummy_transcriber, warned, dummy_intent)
     warnings_second = [rec for rec in caplog.records if rec.levelname == "WARNING"]
     assert len(warnings_second) == 0

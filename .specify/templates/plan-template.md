@@ -32,7 +32,7 @@
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - **Testable Application Logic**: confirm every behavior described above either ships with automated tests or a concrete test plan describing how the code can be exercised independently of invocations.
-- **Invocation Stewardship**: surface any flow that runs Foundry services, CLI tooling, or runtime commands as a manual verification item, including the success criteria to be observed by a reviewer.
+- **Invocation Stewardship**: surface any flow that runs Foundry services, CLI tooling, or runtime commands as a manual verification item, including the success criteria to be observed by a reviewer, except intent derivation which MUST be tested using the actual LLM model.
 - **Python + uv First Flow**: declare the Python ≥3.14 entry point and the `uv run …` invocation that will execute the plan so the runtime stays aligned with the constitution.
 - **Reference Implementations**: when the feature borders agent tooling or transcription flows, point to sample-agent-framework.py or sample-transcribe.py as the design anchor.
 
