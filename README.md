@@ -38,6 +38,30 @@ uv run app.py
 - Confirm processed files move to `.voice-processed/`.
 - Confirm processed filenames are prefixed with the intent timestamp (e.g., `YYYYMMDDTHHMMSS-original.mp3`).
 
+## Interface to Microsoft To Do
+
+The agent does not have direct access to my corporate to do list. It has to pass a create to create a to-do item using a Logic App webhook expecting this format:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "due": {
+      "type": "string"
+    },
+    "reminder": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
+```
+
 ## Troubleshooting
 
 On corporate machine Foundry Local service is started but cannot be access by the apps. Issue might be that some of the randomly selected ports are blocked by the firewall. To fix this set a port that is not blocked:
