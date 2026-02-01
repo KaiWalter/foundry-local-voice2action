@@ -15,7 +15,10 @@ def test_move_to_processed_on_success(temp_config, test_logger) -> None:
     def dummy_transcriber(_: Path) -> str:
         return "hello"
 
-    process_inbox_once(temp_config, test_logger, dummy_transcriber, set())
+    def dummy_intent(_: str) -> dict[str, str]:
+        return {"intent": "create-note", "content": "hello"}
+
+    process_inbox_once(temp_config, test_logger, dummy_transcriber, set(), dummy_intent)
 
     assert not mp3_file.exists()
     assert (temp_config.processed_dir / "voice.mp3").exists()

@@ -12,3 +12,8 @@ dependencies = [
     "openai",
     "pytest",
 ]
+
+[tool.pytest.ini_options]
+markers = [
+    "llm: tests that invoke the real LLM model",
+]

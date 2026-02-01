@@ -12,7 +12,7 @@ description: "Task list template for feature implementation"
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
-**Constitution note**: Every task with application logic should bake in an automated test step; invocation-only tasks are flagged as manual, include the `uv run …` command that exercises the flow, and describe the expected manual verification observations.
+**Constitution note**: Every task with application logic should bake in an automated test step; invocation-only tasks are flagged as manual, include the `uv run …` command that exercises the flow, and describe the expected manual verification observations. Intent derivation tasks MUST include automated tests that use the actual LLM model.
 
 ## Format: `[ID] [P?] [Story] Description`
 
