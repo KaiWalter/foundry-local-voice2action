@@ -36,6 +36,7 @@ uv run app.py
 - Watch console output for transcript results and warnings.
 - Check `.work/voice-inbox.log` for logs.
 - Confirm processed files move to `.voice-processed/`.
+- Confirm processed filenames are prefixed with the intent timestamp (e.g., `YYYYMMDDTHHMMSS-original.mp3`).
 
 ## Troubleshooting
 

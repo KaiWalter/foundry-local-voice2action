@@ -126,6 +126,22 @@ def write_intent_output(work_dir: Path, payload: IntentPayload) -> Path:
     return output_path
 
 
+def _intent_timestamp(intent_path: Path) -> str:
+    name = intent_path.name
+    if name.endswith(INTENT_FILE_SUFFIX):
+        return name[: -len(INTENT_FILE_SUFFIX)]
+    return intent_path.stem
+
+
+def build_processed_destination(
+    intent_path: Path,
+    original_name: str,
+    processed_dir: Path,
+) -> Path:
+    timestamp = _intent_timestamp(intent_path)
+    return processed_dir / f"{timestamp}-{original_name}"
+
+
 def _intent_tool_schema() -> dict:
     return {
         "type": "function",
@@ -412,9 +428,20 @@ def process_inbox_once(
         if intent_payload is None:
             logger.error("Intent extraction failed for %s", audio_path.name)
             continue
-        intent_path = write_intent_output(config.work_dir, intent_payload)
+        try:
+            intent_path = write_intent_output(config.work_dir, intent_payload)
+        except Exception as exc:  # pragma: no cover - defensive guard
+            logger.error("Failed to write intent output for %s: %s", audio_path.name, exc)
+            continue
         logger.info("Intent output written to %s", intent_path)
-        destination = config.processed_dir / audio_path.name
+        destination = build_processed_destination(
+            intent_path,
+            audio_path.name,
+            config.processed_dir,
+        )
+        if destination.exists():
+            logger.error("Processed destination already exists: %s", destination)
+            continue
         try:
             shutil.move(str(audio_path), str(destination))
             logger.info("Moved processed file to %s", destination)
